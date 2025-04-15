@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Teaching Clock</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .button-controls {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 0 15px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .random-button {
+            align-self: flex-start;
+        }
+
+        .clock {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background-color: #fff;
+            border: 15px solid #ffb6c1;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            transition: transform 0.2s ease-out;
+        }
+
+        .center-dot {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background-color: #ff69b4;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .hour-marks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .hour-mark {
+            position: absolute;
+            width: 6px;
+            height: 22px;
+            background-color: #333;
+            top: 8px;
+            left: 50%;
+            transform-origin: 50% 192px;
+            border-radius: 3px;
+        }
+
+        .minute-mark {
+            position: absolute;
+            width: 3px;
+            height: 12px;
+            background-color: #666;
+            top: 8px;
+            left: 50%;
+            transform-origin: 50% 192px;
+            border-radius: 2px;
+        }
+
+        .number {
+            position: absolute;
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            transform-origin: center;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            background-color: #ffd1dc;
+        }
+
+        .minute-number {
+            position: absolute;
+            font-size: 20px;
+            font-weight: bold;
+            color: #555;
+            text-align: center;
+            transform-origin: center;
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            border-radius: 50%;
+            background-color: #c2e6ff;
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+
+        .hour-hand, .minute-hand, .second-hand {
+            position: absolute;
+            transform-origin: bottom center;
+            bottom: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .hour-hand {
+            height: 90px;
+            width: 2px;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 105px solid #333;
+        }
+
+        .minute-hand {
+            height: 140px;
+            width: 2px;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 160px solid #666;
+        }
+
+        .second-hand {
+            width: 3px;
+            height: 180px;
+            background-color: #ff4500;
+            border-radius: 1.5px;
+        }
+
+        .time-input {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            font-size: 20px;
+        }
+
+        input {
+            width: 70px;
+            height: 40px;
+            font-size: 20px;
+            text-align: center;
+            border: 3px solid #ffb6c1;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 8px 16px;
+            font-size: 16px;
+            background-color: #ffb6c1;
+            border: none;
+            border-radius: 20px;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            min-width: 80px;
+        }
+
+        button:hover {
+            background-color: #ff8da1;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .active {
+            background-color: #ff4d6d;
+            color: white;
+        }
+
+        .sync-button {
+            min-width: 80px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: scale(0.7);
+            transition: all 0.3s;
+            max-width: 400px;
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-emoji {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .modal-text {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .close-button {
+            font-size: 18px;
+            padding: 8px 20px;
+        }
+        
+        .side-controls {
+            position: static;
+            display: flex;
+            margin-bottom: 15px;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="button-controls">
+            <div class="control-buttons">
+                <button id="hourToggle" class="active">时针 ✓</button>
+                <button id="minuteToggle" class="active">分针 ✓</button>
+                <button id="secondToggle">秒针</button>
+                <button id="minuteNumbersToggle">分钟数字</button>
+            </div>
+            <button id="randomTime" class="random-button">随机时间</button>
+        </div>
+        
+        <div class="clock">
+            <div class="hour-marks"></div>
+            <div class="hour-hand" id="hourHand"></div>
+            <div class="minute-hand" id="minuteHand"></div>
+            <div class="second-hand" id="secondHand" style="display: none;"></div>
+            <div class="center-dot"></div>
+        </div>
+        
+        <div class="time-input">
+            <button id="syncToggle" class="sync-button active">联动✓</button>
+            <input type="number" id="hourInput" min="1" max="12" placeholder="时">
+            <span>：</span>
+            <input type="number" id="minuteInput" min="0" max="59" placeholder="分">
+            <button id="verifyButton">验证</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <div class="modal-emoji" id="modalEmoji"></div>
+            <div class="modal-text" id="modalText"></div>
+            <button class="close-button" id="closeModal">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const clock = document.querySelector('.clock');
+            const hourHand = document.getElementById('hourHand');
+            const minuteHand = document.getElementById('minuteHand');
+            const secondHand = document.getElementById('secondHand');
+            const hourToggle = document.getElementById('hourToggle');
+            const minuteToggle = document.getElementById('minuteToggle');
+            const secondToggle = document.getElementById('secondToggle');
+            const minuteNumbersToggle = document.getElementById('minuteNumbersToggle');
+            const randomTimeBtn = document.getElementById('randomTime');
+            const hourInput = document.getElementById('hourInput');
+            const minuteInput = document.getElementById('minuteInput');
+            const verifyButton = document.getElementById('verifyButton');
+            const syncToggle = document.getElementById('syncToggle');
+            const modal = document.getElementById('resultModal');
+            const modalEmoji = document.getElementById('modalEmoji');
+            const modalText = document.getElementById('modalText');
+            const closeModal = document.getElementById('closeModal');
+            const hourMarks = document.querySelector('.hour-marks');
+            
+            // Clock state
+            let hours = 9;
+            let minutes = 0;
+            let seconds = 0;
+            let isSync = true;
+            let isDragging = false;
+            let activeDragHand = null;
+            let startAngle = 0;
+            let clockCenterX, clockCenterY, clockRadius;
+            let showMinuteNumbers = false;
+            
+            // Create clock face
+            function createClockFace() {
+                // Create hour marks and numbers
+                for (let i = 0; i < 60; i++) {
+                    if (i % 5 === 0) {
+                        // Hour marks
+                        const hourMark = document.createElement('div');
+                        hourMark.className = 'hour-mark';
+                        hourMark.style.transform = `rotate(${i * 6}deg)`;
+                        hourMarks.appendChild(hourMark);
+                        
+                        // Numbers
+                        const hourNumber = i / 5 === 0 ? 12 : i / 5;
+                        const number = document.createElement('div');
+                        number.className = 'number';
+                        number.textContent = hourNumber;
+                        
+                        // Position numbers
+                        const angle = (i / 60) * 2 * Math.PI;
+                        const radius = 145;  // Reduced for smaller clock
+                        const x = Math.sin(angle) * radius;
+                        const y = -Math.cos(angle) * radius;
+                        
+                        number.style.left = `calc(50% + ${x}px - 20px)`;
+                        number.style.top = `calc(50% + ${y}px - 20px)`;
+                        clock.appendChild(number);
+                        
+                        // Create minute numbers (initially hidden)
+                        const minuteValue = i === 0 ? "0" : (i / 5 * 5).toString();
+                        const minuteNumber = document.createElement('div');
+                        minuteNumber.className = 'minute-number';
+                        minuteNumber.textContent = minuteValue;
+                        minuteNumber.style.opacity = '0';
+                        
+                        // Position minute numbers outside of hour numbers
+                        const minuteRadius = 235; // Adjusted for smaller clock
+                        const mx = Math.sin(angle) * minuteRadius;
+                        const my = -Math.cos(angle) * minuteRadius;
+                        
+                        minuteNumber.style.left = `calc(50% + ${mx}px - 16px)`;
+                        minuteNumber.style.top = `calc(50% + ${my}px - 16px)`;
+                        clock.appendChild(minuteNumber);
+                    } else {
+                        // Minute marks
+                        const minuteMark = document.createElement('div');
+                        minuteMark.className = 'minute-mark';
+                        minuteMark.style.transform = `rotate(${i * 6}deg)`;
+                        hourMarks.appendChild(minuteMark);
+                    }
+                }
+            }
+            
+            // Toggle minute numbers visibility
+            function toggleMinuteNumbers() {
+                showMinuteNumbers = !showMinuteNumbers;
+                const minuteNumbers = document.querySelectorAll('.minute-number');
+                
+                minuteNumbers.forEach(num => {
+                    num.style.opacity = showMinuteNumbers ? '1' : '0';
+                });
+                
+                minuteNumbersToggle.classList.toggle('active');
+                minuteNumbersToggle.textContent = showMinuteNumbers ? '分钟数字 ✓' : '分钟数字';
+            }
+            
+            // Update clock hands
+            function updateClockHands() {
+                const hourDegrees = ((hours % 12) * 30) + (minutes / 2) + (seconds / 120);
+                const minuteDegrees = minutes * 6 + (seconds / 10);
+                const secondDegrees = seconds * 6;
+                
+                hourHand.style.transform = `translateX(-50%) rotate(${hourDegrees}deg)`;
+                minuteHand.style.transform = `translateX(-50%) rotate(${minuteDegrees}deg)`;
+                secondHand.style.transform = `translateX(-50%) rotate(${secondDegrees}deg)`;
+                
+                if (isSync) {
+                    updateInputs();
+                }
+            }
+            
+            // Update input fields
+            function updateInputs() {
+                hourInput.value = hours === 0 ? 12 : hours;
+                minuteInput.value = minutes;
+            }
+            
+            // Update clock time
+            function updateClockTime(newHours, newMinutes, newSeconds) {
+                hours = newHours < 0 ? 12 + (newHours % 12) : newHours % 12;
+                if (hours === 0 && newHours !== 0) hours = 12;
+                minutes = newMinutes < 0 ? 60 + (newMinutes % 60) : newMinutes % 60;
+                seconds = newSeconds < 0 ? 60 + (newSeconds % 60) : newSeconds % 60;
+                updateClockHands();
+            }
+            
+            // Generate random time
+            function generateRandomTime() {
+                const randomHours = Math.floor(Math.random() * 12) + 1;
+                const randomMinutes = Math.floor(Math.random() * 60);
+                const randomSeconds = Math.floor(Math.random() * 60);
+                updateClockTime(randomHours, randomMinutes, randomSeconds);
+            }
+            
+            // Calculate angle from point to center
+            function calculateAngle(x, y) {
+                const deltaX = x - clockCenterX;
+                const deltaY = y - clockCenterY;
+                let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
+                if (angle < 0) angle += 360;
+                return angle;
+            }
+            
+            // Get hand from angle
+            function getHandFromAngle(angle) {
+                // Convert angle to time
+                let newHours, newMinutes, newSeconds;
+                
+                if (activeDragHand === hourHand) {
+                    // Hour hand makes a full circle in 12 hours (720 minutes)
+                    newHours = Math.floor((angle / 360) * 12);
+                    newMinutes = minutes;
+                    newSeconds = seconds;
+                    
+                    // Calculate the exact hour including the minute position
+                    const totalMinutes = (angle / 360) * 720;
+                    newMinutes = Math.round(totalMinutes % 60);
+                    newHours = Math.floor(totalMinutes / 60);
+                    
+                    // Adjust for 12 o'clock
+                    if (newHours === 0) newHours = 12;
+                } else if (activeDragHand === minuteHand) {
+                    // Minute hand makes a full circle in 60 minutes
+                    newMinutes = Math.round((angle / 360) * 60);
+                    if (newMinutes === 60) newMinutes = 0;
+                    
+                    // Calculate new hour based on minute overflow
+                    newHours = newMinutes === 0 && Math.abs(minutes - 59) < Math.abs(minutes - 1) ? 
+                               (hours + 1) % 12 : 
+                               newMinutes === 59 && Math.abs(minutes - 0) < Math.abs(minutes - 58) ? 
+                               (hours - 1 + 12) % 12 : 
+                               hours;
+                               
+                    if (newHours === 0) newHours = 12;
+                    newSeconds = seconds;
+                } else if (activeDragHand === secondHand) {
+                    // Second hand makes a full circle in 60 seconds
+                    newSeconds = Math.round((angle / 360) * 60);
+                    if (newSeconds === 60) newSeconds = 0;
+                    
+                    // Calculate new minute based on second overflow
+                    newMinutes = newSeconds === 0 && Math.abs(seconds - 59) < Math.abs(seconds - 1) ? 
+                                (minutes + 1) % 60 : 
+                                newSeconds === 59 && Math.abs(seconds - 0) < Math.abs(seconds - 58) ? 
+                                (minutes - 1 + 60) % 60 : 
+                                minutes;
+                                
+                    // Calculate new hour based on minute overflow
+                    newHours = newMinutes === 0 && Math.abs(minutes - 59) < Math.abs(minutes - 1) ? 
+                              (hours + 1) % 12 : 
+                              newMinutes === 59 && Math.abs(minutes - 0) < Math.abs(minutes - 58) ? 
+                              (hours - 1 + 12) % 12 : 
+                              hours;
+                              
+                    if (newHours === 0) newHours = 12;
+                }
+                
+                return { hours: newHours, minutes: newMinutes, seconds: newSeconds };
+            }
+            
+            // Set up event listeners
+            function setupEventListeners() {
+                // Toggle buttons
+                hourToggle.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    hourHand.style.display = this.classList.contains('active') ? 'block' : 'none';
+                    this.textContent = this.classList.contains('active') ? '时针 ✓' : '时针';
+                });
+                
+                minuteToggle.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    minuteHand.style.display = this.classList.contains('active') ? 'block' : 'none';
+                    this.textContent = this.classList.contains('active') ? '分针 ✓' : '分针';
+                });
+                
+                secondToggle.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    secondHand.style.display = this.classList.contains('active') ? 'block' : 'none';
+                    this.textContent = this.classList.contains('active') ? '秒针 ✓' : '秒针';
+                });
+                
+                // Minute numbers toggle
+                minuteNumbersToggle.addEventListener('click', toggleMinuteNumbers);
+                
+                // Random time button
+                randomTimeBtn.addEventListener('click', generateRandomTime);
+                
+                // Sync toggle
+                syncToggle.addEventListener('click', function() {
+                    isSync = !isSync;
+                    this.classList.toggle('active');
+                    this.textContent = isSync ? '联动✓' : '联动';
+                    
+                    if (isSync) {
+                        updateInputs();
+                    } else {
+                        hourInput.value = '';
+                        minuteInput.value = '';
+                    }
+                });
+                
+                // Verify button
+                verifyButton.addEventListener('click', function() {
+                    const inputHour = parseInt(hourInput.value) || 0;
+                    const inputMinute = parseInt(minuteInput.value) || 0;
+                    
+                    const clockHour = hours === 0 ? 12 : hours;
+                    
+                    if (inputHour === clockHour && inputMinute === minutes) {
+                        modalEmoji.textContent = '😄';
+                        modalText.textContent = '太棒了！你答对了！';
+                    } else {
+                        modalEmoji.textContent = '😊';
+                        modalText.textContent = 'Oops，再努力一次吧！';
+                    }
+                    
+                    modal.classList.add('show');
+                });
+                
+                // Close modal
+                closeModal.addEventListener('click', function() {
+                    modal.classList.remove('show');
+                });
+                
+                // Drag functionality
+                const hands = [hourHand, minuteHand, secondHand];
+                
+                hands.forEach(hand => {
+                    hand.addEventListener('mousedown', startDrag);
+                    hand.addEventListener('touchstart', startDrag, { passive: false });
+                });
+                
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('touchmove', drag, { passive: false });
+                
+                document.addEventListener('mouseup', endDrag);
+                document.addEventListener('touchend', endDrag);
+                
+                // Input change events
+                hourInput.addEventListener('input', function() {
+                    if (!isSync) {
+                        let value = parseInt(this.value) || 0;
+                        if (value > 12) value = 12;
+                        if (value < 1) value = 1;
+                        this.value = value;
+                    }
+                });
+                
+                // Clear input fields on focus
+                hourInput.addEventListener('focus', function() {
+                    if (!isSync)
+                        this.value = '';
+                });
+                
+                minuteInput.addEventListener('focus', function() {
+                    if (!isSync)
+                        this.value = '';
+                });
+
+                minuteInput.addEventListener('input', function() {
+                    if (!isSync) {
+                        let value = parseInt(this.value) || 0;
+                        if (value > 59) value = 59;
+                        if (value < 0) value = 0;
+                        this.value = value;
+                    }
+                });
+                
+                // Update clock dimensions on resize
+                window.addEventListener('resize', updateClockDimensions);
+            }
+            
+            // Start dragging
+            function startDrag(e) {
+                e.preventDefault();
+                
+                updateClockDimensions();
+                
+                isDragging = true;
+                activeDragHand = this;
+                
+                const pageX = e.type.includes('touch') ? e.touches[0].pageX : e.pageX;
+                const pageY = e.type.includes('touch') ? e.touches[0].pageY : e.pageY;
+                
+                startAngle = calculateAngle(pageX, pageY);
+            }
+            
+            // Drag
+            function drag(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                
+                const pageX = e.type.includes('touch') ? e.touches[0].pageX : e.pageX;
+                const pageY = e.type.includes('touch') ? e.touches[0].pageY : e.pageY;
+                
+                const currentAngle = calculateAngle(pageX, pageY);
+                const newTime = getHandFromAngle(currentAngle);
+                
+                updateClockTime(newTime.hours, newTime.minutes, newTime.seconds);
+
+                if (!isSync) {
+                    hourInput.value = '';
+                    minuteInput.value = '';
+                }
+            }
+            
+            // End dragging
+            function endDrag() {
+                isDragging = false;
+                activeDragHand = null;
+            }
+            
+            // Update clock dimensions
+            function updateClockDimensions() {
+                const rect = clock.getBoundingClientRect();
+                clockCenterX = rect.left + rect.width / 2;
+                clockCenterY = rect.top + rect.height / 2;
+                clockRadius = rect.width / 2;
+            }
+            
+            // Initialize
+            function init() {
+                createClockFace();
+                updateClockDimensions();
+                updateClockTime(9, 0, 0);
+                setupEventListeners();
+            }
+            
+            init();
+        });
+    </script>
+</body>
+</html>
