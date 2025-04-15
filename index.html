@@ -135,17 +135,18 @@
             transition: opacity 0.3s;
         }
 
-        .hour-hand, .minute-hand, .second-hand {
+        /* Visual representation of the hands */
+        .hour-hand-visual, .minute-hand-visual, .second-hand-visual {
             position: absolute;
             transform-origin: bottom center;
             bottom: 50%;
             left: 50%;
             transform: translateX(-50%);
-            cursor: pointer;
             z-index: 5;
+            pointer-events: none; /* Make visual elements non-interactive */
         }
 
-        .hour-hand {
+        .hour-hand-visual {
             height: 90px;
             width: 2px;
             border-left: 8px solid transparent;
@@ -153,7 +154,7 @@
             border-bottom: 105px solid #333;
         }
 
-        .minute-hand {
+        .minute-hand-visual {
             height: 140px;
             width: 2px;
             border-left: 6px solid transparent;
@@ -161,11 +162,41 @@
             border-bottom: 160px solid #666;
         }
 
-        .second-hand {
+        .second-hand-visual {
             width: 3px;
             height: 180px;
             background-color: #ff4500;
             border-radius: 1.5px;
+        }
+
+        /* Clickable areas for the hands - invisible but larger for better touch */
+        .hour-hand, .minute-hand, .second-hand {
+            position: absolute;
+            transform-origin: bottom center;
+            bottom: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            z-index: 6;
+            background-color: transparent; /* Make them invisible */
+        }
+
+        .hour-hand {
+            height: 110px;
+            width: 30px; /* Much wider than visual for easy touch */
+            border-radius: 15px;
+        }
+
+        .minute-hand {
+            height: 160px;
+            width: 30px; /* Much wider than visual for easy touch */
+            border-radius: 13px;
+        }
+
+        .second-hand {
+            height: 185px;
+            width: 25px; /* Much wider than visual for easy touch */
+            border-radius: 10px;
         }
 
         .time-input {
@@ -274,6 +305,7 @@
             margin-bottom: 15px;
             gap: 8px;
         }
+        
     </style>
 </head>
 <body>
@@ -290,16 +322,23 @@
         
         <div class="clock">
             <div class="hour-marks"></div>
+            <!-- Visual representations of the hands -->
+            <div class="hour-hand-visual" id="hourHandVisual"></div>
+            <div class="minute-hand-visual" id="minuteHandVisual"></div>
+            <div class="second-hand-visual" id="secondHandVisual" style="display: none;"></div>
+            
+            <!-- Wider invisible clickable areas -->
             <div class="hour-hand" id="hourHand"></div>
             <div class="minute-hand" id="minuteHand"></div>
             <div class="second-hand" id="secondHand" style="display: none;"></div>
+            
             <div class="center-dot"></div>
         </div>
         
         <div class="time-input">
             <button id="syncToggle" class="sync-button active">联动✓</button>
             <input type="number" id="hourInput" min="1" max="12" placeholder="时">
-            <span>：</span>
+            <span>:</span>
             <input type="number" id="minuteInput" min="0" max="59" placeholder="分">
             <button id="verifyButton">验证</button>
         </div>
@@ -320,6 +359,9 @@
             const hourHand = document.getElementById('hourHand');
             const minuteHand = document.getElementById('minuteHand');
             const secondHand = document.getElementById('secondHand');
+            const hourHandVisual = document.getElementById('hourHandVisual');
+            const minuteHandVisual = document.getElementById('minuteHandVisual');
+            const secondHandVisual = document.getElementById('secondHandVisual');
             const hourToggle = document.getElementById('hourToggle');
             const minuteToggle = document.getElementById('minuteToggle');
             const secondToggle = document.getElementById('secondToggle');
@@ -342,6 +384,7 @@
             let isSync = true;
             let isDragging = false;
             let activeDragHand = null;
+            let activeVisualHand = null;
             let startAngle = 0;
             let clockCenterX, clockCenterY, clockRadius;
             let showMinuteNumbers = false;
@@ -365,7 +408,7 @@
                         
                         // Position numbers
                         const angle = (i / 60) * 2 * Math.PI;
-                        const radius = 145;  // Reduced for smaller clock
+                        const radius = 145; // Adjusted for 400px clock
                         const x = Math.sin(angle) * radius;
                         const y = -Math.cos(angle) * radius;
                         
@@ -381,7 +424,7 @@
                         minuteNumber.style.opacity = '0';
                         
                         // Position minute numbers outside of hour numbers
-                        const minuteRadius = 235; // Adjusted for smaller clock
+                        const minuteRadius = 235; // Adjusted for 400px clock
                         const mx = Math.sin(angle) * minuteRadius;
                         const my = -Math.cos(angle) * minuteRadius;
                         
@@ -417,9 +460,14 @@
                 const minuteDegrees = minutes * 6 + (seconds / 10);
                 const secondDegrees = seconds * 6;
                 
+                // Update both visual and clickable elements
                 hourHand.style.transform = `translateX(-50%) rotate(${hourDegrees}deg)`;
                 minuteHand.style.transform = `translateX(-50%) rotate(${minuteDegrees}deg)`;
                 secondHand.style.transform = `translateX(-50%) rotate(${secondDegrees}deg)`;
+                
+                hourHandVisual.style.transform = `translateX(-50%) rotate(${hourDegrees}deg)`;
+                minuteHandVisual.style.transform = `translateX(-50%) rotate(${minuteDegrees}deg)`;
+                secondHandVisual.style.transform = `translateX(-50%) rotate(${secondDegrees}deg)`;
                 
                 if (isSync) {
                     updateInputs();
@@ -521,18 +569,21 @@
                 hourToggle.addEventListener('click', function() {
                     this.classList.toggle('active');
                     hourHand.style.display = this.classList.contains('active') ? 'block' : 'none';
+                    hourHandVisual.style.display = this.classList.contains('active') ? 'block' : 'none';
                     this.textContent = this.classList.contains('active') ? '时针 ✓' : '时针';
                 });
                 
                 minuteToggle.addEventListener('click', function() {
                     this.classList.toggle('active');
                     minuteHand.style.display = this.classList.contains('active') ? 'block' : 'none';
+                    minuteHandVisual.style.display = this.classList.contains('active') ? 'block' : 'none';
                     this.textContent = this.classList.contains('active') ? '分针 ✓' : '分针';
                 });
                 
                 secondToggle.addEventListener('click', function() {
                     this.classList.toggle('active');
                     secondHand.style.display = this.classList.contains('active') ? 'block' : 'none';
+                    secondHandVisual.style.display = this.classList.contains('active') ? 'block' : 'none';
                     this.textContent = this.classList.contains('active') ? '秒针 ✓' : '秒针';
                 });
                 
@@ -579,12 +630,23 @@
                     modal.classList.remove('show');
                 });
                 
-                // Drag functionality
-                const hands = [hourHand, minuteHand, secondHand];
+                // Drag functionality - map the clickable hands to their visual counterparts
+                const handPairs = [
+                    { clickable: hourHand, visual: hourHandVisual },
+                    { clickable: minuteHand, visual: minuteHandVisual },
+                    { clickable: secondHand, visual: secondHandVisual }
+                ];
                 
-                hands.forEach(hand => {
-                    hand.addEventListener('mousedown', startDrag);
-                    hand.addEventListener('touchstart', startDrag, { passive: false });
+                handPairs.forEach(pair => {
+                    pair.clickable.addEventListener('mousedown', function(e) {
+                        startDrag.call(this, e);
+                        activeVisualHand = pair.visual;
+                    });
+                    
+                    pair.clickable.addEventListener('touchstart', function(e) {
+                        startDrag.call(this, e);
+                        activeVisualHand = pair.visual;
+                    }, { passive: false });
                 });
                 
                 document.addEventListener('mousemove', drag);
@@ -655,16 +717,19 @@
                 
                 updateClockTime(newTime.hours, newTime.minutes, newTime.seconds);
 
+/*
                 if (!isSync) {
                     hourInput.value = '';
                     minuteInput.value = '';
                 }
+		*/
             }
             
             // End dragging
             function endDrag() {
                 isDragging = false;
                 activeDragHand = null;
+                activeVisualHand = null;
             }
             
             // Update clock dimensions
