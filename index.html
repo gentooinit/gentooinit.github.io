@@ -493,7 +493,7 @@
             function generateRandomTime() {
                 const randomHours = Math.floor(Math.random() * 12) + 1;
                 const randomMinutes = Math.floor(Math.random() * 60);
-                const randomSeconds = Math.floor(Math.random() * 60);
+                const randomSeconds = secondToggle.classList.contains('active') ? Math.floor(Math.random() * 60) : 0;
                 updateClockTime(randomHours, randomMinutes, randomSeconds);
             }
             
@@ -613,8 +613,9 @@
                     const inputMinute = parseInt(minuteInput.value) || 0;
                     
                     const clockHour = hours === 0 ? 12 : hours;
+		    const inputHourCap = inputHour === 0 ? 12 : inputHour;
                     
-                    if (inputHour === clockHour && inputMinute === minutes) {
+                    if (inputHourCap === clockHour && inputMinute === minutes) {
                         modalEmoji.textContent = '😄';
                         modalText.textContent = '太棒了！你答对了！';
                     } else {
@@ -660,7 +661,7 @@
                     if (!isSync) {
                         let value = parseInt(this.value) || 0;
                         if (value > 12) value = 12;
-                        if (value < 1) value = 1;
+                        if (value < 0) value = 0;
                         this.value = value;
                     }
                 });
