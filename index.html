@@ -397,7 +397,7 @@
                         // Hour marks
                         const hourMark = document.createElement('div');
                         hourMark.className = 'hour-mark';
-                        hourMark.style.transform = `rotate(${i * 6}deg)`;
+                        hourMark.style.transform = `translateX(-50%) rotate(${i * 6}deg)`;
                         hourMarks.appendChild(hourMark);
                         
                         // Numbers
@@ -435,7 +435,7 @@
                         // Minute marks
                         const minuteMark = document.createElement('div');
                         minuteMark.className = 'minute-mark';
-                        minuteMark.style.transform = `rotate(${i * 6}deg)`;
+                        minuteMark.style.transform = `translateX(-50%) rotate(${i * 6}deg)`;
                         hourMarks.appendChild(minuteMark);
                     }
                 }
