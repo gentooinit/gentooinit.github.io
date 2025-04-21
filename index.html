@@ -1,809 +1,880 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-	<meta http-equiv="Cache-Control" content="no-store">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Teaching Clock</title>
-        <style>
-            :root {
-                --clock-base-size: 80dvmin;
-            }
 
-            * {
-                user-select: none;
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                -ms-user-select: none;
-            }
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-store">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teaching Clock</title>
+    <style>
+        :root {
+            --clock-base-size: 80dvmin;
+        }
 
-            body {
-                font-family: "Comic Sans MS", cursive, sans-serif;
-                background-color: #f0f8ff;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                min-height: 100svh;
-                margin: 0;
-                overflow: hidden;
-                padding: 0;
-                /*touch-action: manipulation;*/
-                touch-action: none;
-            }
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
 
-            .container {
-                position: relative;
-                width: 100%;
-                max-width: 90dvmin;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                height: 100svh;
-                padding: 2dvmin;
-            }
+        body {
+            font-family: "Comic Sans MS", cursive, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100svh;
+            margin: 0;
+            overflow: hidden;
+            padding: 0;
+            /*touch-action: manipulation;*/
+            touch-action: none;
+        }
 
-            .button-controls {
-                width: 100%;
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: space-between;
-                align-items: center;
-                gap: 1.5dvmin;
-                padding: 0 2dvmin;
-                height: auto;
-                margin-bottom: var(--number-space);
-            }
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 95dvmin;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100svh;
+            padding: 2dvmin;
+        }
 
-            .control-buttons {
-                display: flex;
-                gap: 1dvmin;
-                justify-content: center;
-            }
+        .button-controls {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1dvmin;
+            padding: 0 2dvmin;
+            height: auto;
+            margin-bottom: var(--number-space);
+        }
 
-            .random-button {
-                align-self: flex-start;
-            }
+        .control-buttons {
+            display: flex;
+            gap: 1dvmin;
+            /*justify-content: center;*/
+            flex-wrap: wrap;
+        }
 
-            .clock {
-                position: relative;
-                aspect-ratio: 1 / 1;
-                width: var(--clock-size);
-                height: var(--clock-size);
-                border-radius: 50%;
-                background-color: #fff;
-                border: calc(var(--clock-size) * 0.0375) solid #ffb6c1;
-                box-shadow: 0 1dvmin 3dvmin rgba(0, 0, 0, 0.2);
-                transition: transform 0.2s ease-out;
-                font-size: calc(var(--clock-size) * 0.07);
-            }
+        .random-button {
+            align-self: flex-start;
+        }
 
-            .center-dot {
-                position: absolute;
-                width: calc(var(--clock-size) * 0.045);
-                height: calc(var(--clock-size) * 0.045);
-                background-color: #ff69b4;
-                border-radius: 50%;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 10;
-            }
+        .clock {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            width: var(--clock-size);
+            height: var(--clock-size);
+            border-radius: 50%;
+            background-color: #fff;
+            border: calc(var(--clock-size) * 0.0375) solid #ffb6c1;
+            box-shadow: 0 1dvmin 3dvmin rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease-out;
+            font-size: calc(var(--clock-size) * 0.07);
+        }
 
-            .hour-marks {
-                position: absolute;
-                width: 100%;
-                height: 100%;
-                top: 0;
-                left: 0;
-            }
+        .center-dot {
+            position: absolute;
+            width: calc(var(--clock-size) * 0.045);
+            height: calc(var(--clock-size) * 0.045);
+            background-color: #ff69b4;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
 
-            .hour-mark {
-                position: absolute;
-                width: calc(var(--clock-size) * 0.015);
-                height: calc(var(--clock-size) * 0.055);
-                background-color: #333;
-                top: calc(var(--clock-size) * 0.02);
-                left: 50%;
-                transform-origin: 50% calc(var(--clock-radius) - var(--clock-size) * 0.02);
-                border-radius: 0.5dvmin;
-            }
+        .hour-marks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
 
-            .minute-mark {
-                position: absolute;
-                width: calc(var(--clock-size) * 0.0075);
-                height: calc(var(--clock-size) * 0.03);
-                background-color: #666;
-                top: calc(var(--clock-size) * 0.02);
-                left: 50%;
-                transform-origin: 50% calc(var(--clock-radius) - var(--clock-size) * 0.02);
-                border-radius: 0.3dvmin;
-            }
+        .hour-mark {
+            position: absolute;
+            width: calc(var(--clock-size) * 0.015);
+            height: calc(var(--clock-size) * 0.055);
+            background-color: #333;
+            top: calc(var(--clock-size) * 0.02);
+            left: 50%;
+            transform-origin: 50% calc(var(--clock-radius) - var(--clock-size) * 0.02);
+            border-radius: 0.5dvmin;
+        }
 
-            .number {
-                position: absolute;
-                font-size: 1em;
-                font-weight: bold;
-                color: #333;
-                text-align: center;
-                width: 1.43em;
-                height: 1.43em;
-                line-height: 1.43em;
-                border-radius: 50%;
-                background-color: #ffd1dc;
-            }
+        .minute-mark {
+            position: absolute;
+            width: calc(var(--clock-size) * 0.0075);
+            height: calc(var(--clock-size) * 0.03);
+            background-color: #666;
+            top: calc(var(--clock-size) * 0.02);
+            left: 50%;
+            transform-origin: 50% calc(var(--clock-radius) - var(--clock-size) * 0.02);
+            border-radius: 0.3dvmin;
+        }
 
-            .minute-number {
-                position: absolute;
-                font-size: 0.71em;
-                font-weight: bold;
-                color: #555;
-                text-align: center;
-                width: 1.6em;
-                height: 1.6em;
-                line-height: 1.6em;
-                border-radius: 50%;
-                background-color: #c2e6ff;
-                opacity: 0;
-                transition: opacity 0.3s;
-            }
+        .number {
+            position: absolute;
+            font-size: 1em;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            width: 1.43em;
+            height: 1.43em;
+            line-height: 1.43em;
+            border-radius: 50%;
+            background-color: #ffd1dc;
+        }
 
-            .hour-hand-visual,
-            .minute-hand-visual,
-            .second-hand-visual {
-                position: absolute;
-                transform-origin: bottom center;
-                bottom: 50%;
-                left: 50%;
-                transform: translateX(-50%);
-                z-index: 5;
-                pointer-events: none;
-            }
+        .minute-number {
+            position: absolute;
+            font-size: 0.71em;
+            font-weight: bold;
+            color: #555;
+            text-align: center;
+            width: 1.6em;
+            height: 1.6em;
+            line-height: 1.6em;
+            border-radius: 50%;
+            background-color: #c2e6ff;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
 
-            .hour-hand-visual {
-                width: 0;
-                height: 0;
-                border-left: calc(var(--clock-radius) * 0.04) solid transparent;
-                border-right: calc(var(--clock-radius) * 0.04) solid transparent;
-                border-bottom: calc(var(--clock-radius) * 0.525) solid #333;
-                bottom: calc(50% - 0.1dvmin);
-            }
+        .hour-hand-visual,
+        .minute-hand-visual,
+        .second-hand-visual {
+            position: absolute;
+            transform-origin: bottom center;
+            bottom: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            pointer-events: none;
+        }
 
-            .minute-hand-visual {
-                width: 0;
-                height: 0;
-                border-left: calc(var(--clock-radius) * 0.03) solid transparent;
-                border-right: calc(var(--clock-radius) * 0.03) solid transparent;
-                border-bottom: calc(var(--clock-radius) * 0.8) solid #666;
-                bottom: calc(50% - 0.1dvmin);
-            }
+        .hour-hand-visual {
+            width: 0;
+            height: 0;
+            border-left: calc(var(--clock-radius) * 0.04) solid transparent;
+            border-right: calc(var(--clock-radius) * 0.04) solid transparent;
+            border-bottom: calc(var(--clock-radius) * 0.525) solid #333;
+            bottom: calc(50% - 0.1dvmin);
+        }
 
-            .second-hand-visual {
-                width: calc(var(--clock-radius) * 0.015);
-                height: calc(var(--clock-radius) * 0.9);
-                background-color: #ff4500;
-                border-radius: calc(var(--clock-radius) * 0.0075);
-            }
+        .minute-hand-visual {
+            width: 0;
+            height: 0;
+            border-left: calc(var(--clock-radius) * 0.03) solid transparent;
+            border-right: calc(var(--clock-radius) * 0.03) solid transparent;
+            border-bottom: calc(var(--clock-radius) * 0.8) solid #666;
+            bottom: calc(50% - 0.1dvmin);
+        }
 
-            .hour-hand,
-            .minute-hand,
-            .second-hand {
-                position: absolute;
-                transform-origin: bottom center;
-                bottom: 50%;
-                left: 50%;
-                transform: translateX(-50%);
-                cursor: pointer;
-                z-index: 6;
-                background-color: transparent;
-            }
+        .second-hand-visual {
+            width: calc(var(--clock-radius) * 0.015);
+            height: calc(var(--clock-radius) * 0.9);
+            background-color: #ff4500;
+            border-radius: calc(var(--clock-radius) * 0.0075);
+        }
 
-            .hour-hand {
-                height: calc(var(--clock-radius) * 0.55);
-                width: calc(var(--clock-radius) * 0.15);
-                border-radius: calc(var(--clock-radius) * 0.075);
-            }
+        .hour-hand,
+        .minute-hand,
+        .second-hand {
+            position: absolute;
+            transform-origin: bottom center;
+            bottom: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            z-index: 6;
+            background-color: transparent;
+        }
 
-            .minute-hand {
-                height: calc(var(--clock-radius) * 0.8);
-                width: calc(var(--clock-radius) * 0.15);
-                border-radius: calc(var(--clock-radius) * 0.065);
-            }
+        .hour-hand {
+            height: calc(var(--clock-radius) * 0.55);
+            width: calc(var(--clock-radius) * 0.15);
+            border-radius: calc(var(--clock-radius) * 0.075);
+        }
 
-            .second-hand {
-                height: calc(var(--clock-radius) * 0.925);
-                width: calc(var(--clock-radius) * 0.125);
-                border-radius: calc(var(--clock-radius) * 0.05);
-            }
+        .minute-hand {
+            height: calc(var(--clock-radius) * 0.8);
+            width: calc(var(--clock-radius) * 0.15);
+            border-radius: calc(var(--clock-radius) * 0.065);
+        }
 
-            .time-input {
-                display: flex;
-                align-items: center;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 1.5dvmin;
-                font-size: max(16px, 2.5dvmin);
-                margin-bottom: 3dvmin;
-                margin-top: var(--number-space);
-                height: auto;
-            }
+        .second-hand {
+            height: calc(var(--clock-radius) * 0.925);
+            width: calc(var(--clock-radius) * 0.125);
+            border-radius: calc(var(--clock-radius) * 0.05);
+        }
 
-            .time-input span {
-                font-size: max(16px, 2.5dvmin);
-                font-family: "Comic Sans MS", cursive, sans-serif;
-                font-style: normal;
-                line-height: 1;
-            }
+        .time-input {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5dvmin;
+            font-size: max(16px, 2.5dvmin);
+            margin-bottom: 3dvmin;
+            margin-top: var(--number-space);
+            height: auto;
+        }
 
-            input {
-                width: 2.5em;
-                height: 1.5em;
-                font-size: 1em;
-                text-align: center;
-                border: max(2px, 0.3dvmin) solid #ffb6c1;
-                border-radius: 1dvmin;
-                padding: 0.5em;
-            }
+        .time-input span {
+            font-size: max(16px, 2.5dvmin);
+            font-family: "Comic Sans MS", cursive, sans-serif;
+            font-style: normal;
+            line-height: 1;
+        }
 
-            button {
-                padding: 0.8em 1.5em;
-                font-size: max(14px, 2.2dvmin);
-                background-color: #ffb6c1;
-                border: none;
-                border-radius: 3em;
-                color: #333;
-                cursor: pointer;
-                box-shadow: 0 0.3em 0.6em rgba(0, 0, 0, 0.1);
-                transition: all 0.3s;
-                font-family: "Comic Sans MS", cursive, sans-serif;
-                min-width: 9ch;
-                flex-shrink: 0;
-            }
+        input {
+            width: 2.5em;
+            height: 1.5em;
+            font-size: 1em;
+            text-align: center;
+            border: max(2px, 0.3dvmin) solid #ffb6c1;
+            border-radius: 1dvmin;
+            padding: 0.5em;
+        }
 
-            button:hover {
-                background-color: #ff8da1;
-                transform: translateY(-0.1em);
-            }
+        button {
+            padding: 0.8em 1.5em;
+            font-size: max(14px, 2.2dvmin);
+            background-color: #ffb6c1;
+            border: none;
+            border-radius: 3em;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 0.3em 0.6em rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            font-family: "Comic Sans MS", cursive, sans-serif;
+            min-width: 9ch;
+            flex-shrink: 0;
+        }
 
-            button:active {
-                transform: translateY(0.05em);
-            }
+        button:hover {
+            background-color: #ff8da1;
+            transform: translateY(-0.1em);
+        }
 
-            .active {
-                background-color: #ff4d6d;
-                color: white;
-            }
+        button:active {
+            transform: translateY(0.05em);
+        }
 
-            .modal {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100dvw;
-                height: 100dvh;
-                background-color: rgba(0, 0, 0, 0.6);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 100;
-                opacity: 0;
-                visibility: hidden;
-                transition: opacity 0.3s, visibility 0s linear 0.3s;
-                padding: 2dvmin;
-            }
+        button .suffix {
+            visibility: hidden;
+        }
 
-            .modal-content {
-                background-color: white;
-                padding: 4dvmin;
-                border-radius: 2dvmin;
-                text-align: center;
-                box-shadow: 0 1dvmin 2dvmin rgba(0, 0, 0, 0.3);
-                transform: scale(0.7);
-                transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-                max-width: 90dvw;
-                max-height: 90dvh;
-                overflow-y: auto;
-            }
+        button.active .suffix {
+            visibility: visible;
+        }
 
-            .modal.show {
-                opacity: 1;
-                visibility: visible;
-                transition: opacity 0.3s;
-            }
+        .active {
+            background-color: #ff4d6d;
+            color: white;
+        }
 
-            .modal.show .modal-content {
-                transform: scale(1);
-            }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100dvw;
+            height: 100dvh;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0s linear 0.3s;
+            padding: 2dvmin;
+        }
 
-            .modal-emoji {
-                font-size: 8dvmin;
-                margin-bottom: 3dvmin;
-            }
+        .modal-content {
+            background-color: white;
+            padding: 4dvmin;
+            border-radius: 2dvmin;
+            text-align: center;
+            box-shadow: 0 1dvmin 2dvmin rgba(0, 0, 0, 0.3);
+            transform: scale(0.7);
+            transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            max-width: 90dvw;
+            max-height: 90dvh;
+            overflow-y: auto;
+        }
 
-            .modal-text {
-                font-size: max(18px, 3dvmin);
-                margin-bottom: 3dvmin;
-                line-height: 1.4;
-            }
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s;
+        }
 
-            .close-button {
-                font-size: max(16px, 2.5dvmin);
-                padding: 1.5dvmin 4dvmin;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="button-controls">
-                <div class="control-buttons">
-                    <button id="hourToggle" class="active">时针 ✓</button>
-                    <button id="minuteToggle" class="active">分针 ✓</button>
-                    <button id="secondToggle">秒针</button>
-                    <button id="minuteNumbersToggle">分钟数字</button>
-                </div>
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-emoji {
+            font-size: 8dvmin;
+            margin-bottom: 3dvmin;
+        }
+
+        .modal-text {
+            font-size: max(18px, 3dvmin);
+            margin-bottom: 3dvmin;
+            line-height: 1.4;
+        }
+
+        .close-button {
+            font-size: max(16px, 2.5dvmin);
+            padding: 1.5dvmin 4dvmin;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="button-controls">
+            <div class="control-buttons">
+                <button id="hourToggle" class="active"><span class="label">时针</span><span class="suffix">✓</span></button>
+                <button id="minuteToggle" class="active"><span class="label">分针</span><span class="suffix">✓</span></button>
+                <button id="secondToggle"><span class="label">秒针</span><span class="suffix">✓</span></button>
+                <button id="minuteNumbersToggle">分钟数字</button>
+            </div>
+            <div class="control-buttons">
                 <button id="randomTime" class="random-button">随机时间</button>
-            </div>
-
-            <div class="clock">
-                <div class="hour-marks"></div>
-                <div class="hour-hand-visual" id="hourHandVisual"></div>
-                <div class="minute-hand-visual" id="minuteHandVisual"></div>
-                <div class="second-hand-visual" id="secondHandVisual" style="display: none;"></div>
-                <div class="hour-hand" id="hourHand"></div>
-                <div class="minute-hand" id="minuteHand"></div>
-                <div class="second-hand" id="secondHand" style="display: none;"></div>
-                <div class="center-dot"></div>
-            </div>
-
-            <div class="time-input">
-                <button id="syncToggle" class="sync-button active">联动✓</button>
-                <input type="number" id="hourInput" min="0" max="12" placeholder="时" />
-                <span>:</span>
-                <input type="number" id="minuteInput" min="0" max="59" placeholder="分" />
-                <button id="verifyButton">验证</button>
+                <button id="currentTimeToggle" class="random-button"><span class="label">当前时间</span><span class="suffix">✓</span></button>
             </div>
         </div>
 
-        <div class="modal" id="resultModal">
-            <div class="modal-content">
-                <div class="modal-emoji" id="modalEmoji"></div>
-                <div class="modal-text" id="modalText"></div>
-                <button class="close-button" id="closeModal">关闭</button>
-            </div>
+        <div class="clock">
+            <div class="hour-marks"></div>
+            <div class="hour-hand-visual" id="hourHandVisual"></div>
+            <div class="minute-hand-visual" id="minuteHandVisual"></div>
+            <div class="second-hand-visual" id="secondHandVisual" style="display: none;"></div>
+            <div class="hour-hand" id="hourHand"></div>
+            <div class="minute-hand" id="minuteHand"></div>
+            <div class="second-hand" id="secondHand" style="display: none;"></div>
+            <div class="center-dot"></div>
         </div>
 
-        <script>
-            function debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
+        <div class="time-input">
+            <button id="syncToggle" class="sync-button active"><span class="label">联动</span><span class="suffix">✓</span></button>
+            <input type="number" id="hourInput" min="0" max="12" placeholder="时" />
+            <span>:</span>
+            <input type="number" id="minuteInput" min="0" max="59" placeholder="分" />
+            <button id="verifyButton">验证</button>
+        </div>
+    </div>
+
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <div class="modal-emoji" id="modalEmoji"></div>
+            <div class="modal-text" id="modalText"></div>
+            <button class="close-button" id="closeModal">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
                     clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            function updateClockSize() {
+                const container = document.querySelector(".container");
+                const containerHeight = container.clientHeight;
+                const buttonControlsHeight = document.querySelector(".button-controls").offsetHeight;
+                const timeInputHeight = document.querySelector(".time-input").offsetHeight;
+                const paddingTotal = 4 * Math.min(window.innerWidth, window.innerHeight) * 0.02; // 4 * 2dvmin
+
+                const availableHeight = containerHeight - buttonControlsHeight - timeInputHeight - paddingTotal;
+
+                const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                const viewportWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+                const dvmin = Math.min(viewportWidth, viewportHeight);
+                const clampedSize = 0.8 * Math.min(dvmin, availableHeight);
+
+                const root = document.documentElement;
+                root.style.setProperty("--clock-size", `${clampedSize}px`);
+                root.style.setProperty("--clock-radius", `${clampedSize / 2}px`);
+
+                const lastMinuteNumber = document.querySelector(".minute-number");
+                requestAnimationFrame(() => {
+                    const root = document.documentElement;
+                    const numberSpace = lastMinuteNumber.offsetHeight * 1.2;
+                    root.style.setProperty("--number-space", `${numberSpace}px`);
+                    void root.offsetHeight;
+                });
+
+                void root.offsetHeight;
+            }
+
+            const clock = document.querySelector(".clock");
+            const hourHand = document.getElementById("hourHand");
+            const minuteHand = document.getElementById("minuteHand");
+            const secondHand = document.getElementById("secondHand");
+            const hourHandVisual = document.getElementById("hourHandVisual");
+            const minuteHandVisual = document.getElementById("minuteHandVisual");
+            const secondHandVisual = document.getElementById("secondHandVisual");
+            const hourToggle = document.getElementById("hourToggle");
+            const minuteToggle = document.getElementById("minuteToggle");
+            const secondToggle = document.getElementById("secondToggle");
+            const minuteNumbersToggle = document.getElementById("minuteNumbersToggle");
+            const randomTimeBtn = document.getElementById("randomTime");
+            const hourInput = document.getElementById("hourInput");
+            const minuteInput = document.getElementById("minuteInput");
+            const verifyButton = document.getElementById("verifyButton");
+            const syncToggle = document.getElementById("syncToggle");
+            const modal = document.getElementById("resultModal");
+            const modalEmoji = document.getElementById("modalEmoji");
+            const modalText = document.getElementById("modalText");
+            const closeModal = document.getElementById("closeModal");
+            const hourMarksContainer = document.querySelector(".hour-marks");
+            const currentTimeToggle = document.getElementById("currentTimeToggle");
+
+            let hours = 9;
+            let minutes = 0;
+            let seconds = 0;
+            let isSync = true;
+            let isDragging = false;
+            let activeDragHand = null;
+            let clockCenterX, clockCenterY, currentClockRadiusPx;
+            let showMinuteNumbers = false;
+            let domElementsCreated = false;
+            let lastAngle = 0;
+            let currentTimeInterval = null;
+            let currentTimeTimeout = null;
+
+            function updateTimeFromSystem() {
+                const now = new Date();
+                const systemHours = now.getHours() % 12 || 12;
+                const systemMinutes = now.getMinutes();
+                const systemSeconds = now.getSeconds();
+                updateClockTime(systemHours, systemMinutes, systemSeconds);
+            }
+
+            function startPreciseClockSync() {
+                updateTimeFromSystem(); // Sync immediately
+                const now = new Date();
+                const msUntilNextSecond = 1000 - now.getMilliseconds();
+
+                currentTimeTimeout = setTimeout(() => {
+                    updateTimeFromSystem(); // Align exactly at new second
+                    currentTimeInterval = setInterval(updateTimeFromSystem, 1000);
+                }, msUntilNextSecond);
+            }
+
+            function stopClockSync() {
+                clearInterval(currentTimeInterval);
+                clearTimeout(currentTimeTimeout);
+                currentTimeInterval = null;
+                currentTimeTimeout = null;
+            }
+
+            function createClockDOM() {
+                //if (domElementsCreated) return;
+                for (let i = 0; i < 60; i++) {
+                    const angleDeg = i * 6;
+                    const mark = document.createElement("div");
+                    if (i % 5 === 0) {
+                        mark.className = "hour-mark";
+                    } else {
+                        mark.className = "minute-mark";
+                    }
+                    mark.style.transform = `translateX(-50%) rotate(${angleDeg}deg)`;
+                    hourMarksContainer.appendChild(mark);
+                }
+                for (let i = 1; i <= 12; i++) {
+                    const number = document.createElement("div");
+                    number.className = "number hour-num";
+                    number.textContent = i;
+                    number.dataset.hour = i;
+                    clock.appendChild(number);
+                    const minuteValue = (i * 5) % 60;
+                    const minuteNumber = document.createElement("div");
+                    minuteNumber.className = "minute-number min-num";
+                    minuteNumber.textContent = minuteValue;
+                    minuteNumber.dataset.hour = i;
+                    minuteNumber.style.opacity = "0";
+                    clock.appendChild(minuteNumber);
+                }
+
+                domElementsCreated = true;
+            }
+
+            function positionNumbers() {
+                if (!domElementsCreated) return;
+                currentClockRadiusPx = clock.offsetWidth / 2;
+                if (currentClockRadiusPx === 0) return;
+                const hourNumbers = clock.querySelectorAll(".hour-num");
+                const minuteNumbers = clock.querySelectorAll(".min-num");
+                const numberRadiusRatio = 0.68;
+                const minuteNumberRadiusRatio = 1.09;
+                hourNumbers.forEach((number) => {
+                    const hour = parseInt(number.dataset.hour);
+                    const angleRad = (hour / 12) * 2 * Math.PI - Math.PI / 2;
+                    const radius = currentClockRadiusPx * numberRadiusRatio;
+                    const x = Math.cos(angleRad) * radius;
+                    const y = Math.sin(angleRad) * radius;
+                    const numWidth = number.offsetWidth;
+                    const numHeight = number.offsetHeight;
+                    number.style.left = `calc(50% + ${x}px - ${numWidth / 2}px)`;
+                    number.style.top = `calc(50% + ${y}px - ${numHeight / 2}px)`;
+                });
+                minuteNumbers.forEach((minuteNumber) => {
+                    const hour = parseInt(minuteNumber.dataset.hour);
+                    const angleRad = (hour / 12) * 2 * Math.PI - Math.PI / 2;
+                    const radius = currentClockRadiusPx * minuteNumberRadiusRatio;
+                    const x = Math.cos(angleRad) * radius;
+                    const y = Math.sin(angleRad) * radius;
+                    const numWidth = minuteNumber.offsetWidth;
+                    const numHeight = minuteNumber.offsetHeight;
+                    minuteNumber.style.left = `calc(50% + ${x}px - ${numWidth / 2}px)`;
+                    minuteNumber.style.top = `calc(50% + ${y}px - ${numHeight / 2}px)`;
+                });
+            }
+
+            function toggleMinuteNumbers() {
+                showMinuteNumbers = !showMinuteNumbers;
+                const minuteNumElements = document.querySelectorAll(".minute-number");
+                minuteNumElements.forEach((num) => {
+                    num.style.opacity = showMinuteNumbers ? "1" : "0";
+                });
+                minuteNumbersToggle.classList.toggle("active", showMinuteNumbers);
+                //minuteNumbersToggle.textContent = showMinuteNumbers ? "分钟数字 ✓" : "分钟数字";
+            }
+
+            function updateClockHands() {
+                const hourDegrees = (hours % 12) * 30 + minutes / 2 + seconds / 120;
+                const minuteDegrees = minutes * 6 + seconds / 10;
+                const secondDegrees = seconds * 6;
+                hourHand.style.transform = `translateX(-50%) rotate(${hourDegrees}deg)`;
+                minuteHand.style.transform = `translateX(-50%) rotate(${minuteDegrees}deg)`;
+                secondHand.style.transform = `translateX(-50%) rotate(${secondDegrees}deg)`;
+                hourHandVisual.style.transform = `translateX(-50%) rotate(${hourDegrees}deg)`;
+                minuteHandVisual.style.transform = `translateX(-50%) rotate(${minuteDegrees}deg)`;
+                secondHandVisual.style.transform = `translateX(-50%) rotate(${secondDegrees}deg)`;
+                if (isSync) {
+                    updateInputs();
+                }
+            }
+
+            function updateInputs() {
+                hourInput.value = hours === 0 ? 12 : hours;
+                minuteInput.value = minutes;
+            }
+
+            function updateClockTime(newHours, newMinutes, newSeconds) {
+                hours = newHours < 0 ? 12 + (newHours % 12) : newHours % 12;
+                if (hours === 0 && newHours !== 0) hours = 12;
+                minutes = newMinutes < 0 ? 60 + (newMinutes % 60) : newMinutes % 60;
+                seconds = newSeconds < 0 ? 60 + (newSeconds % 60) : newSeconds % 60;
+                updateClockHands();
+            }
+
+            function generateRandomTime() {
+                const randomHours = Math.floor(Math.random() * 12) + 1;
+                const randomMinutes = Math.floor(Math.random() * 60);
+                const randomSeconds = secondToggle.classList.contains("active") ? Math.floor(Math.random() * 60) : 0;
+                updateClockTime(randomHours, randomMinutes, randomSeconds);
+            }
+
+            function calculateAngle(x, y) {
+                const rect = clock.getBoundingClientRect();
+                clockCenterX = rect.left + rect.width / 2;
+                clockCenterY = rect.top + rect.height / 2;
+                const deltaX = x - clockCenterX;
+                const deltaY = y - clockCenterY;
+                let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
+                if (angle < 0) angle += 360;
+                return angle;
+            }
+
+            function getHandFromAngle(angle) {
+                let newHours, newMinutes, newSeconds;
+
+                if (activeDragHand === hourHand) {
+                    newHours = Math.floor((angle / 360) * 12);
+                    newMinutes = minutes;
+                    newSeconds = seconds;
+                    const totalMinutes = (angle / 360) * 720;
+                    newMinutes = Math.round(totalMinutes % 60);
+                    newHours = Math.floor(totalMinutes / 60);
+                    if (newHours === 0) newHours = 12;
+                } else if (activeDragHand === minuteHand) {
+                    newMinutes = Math.round((angle / 360) * 60);
+                    if (newMinutes === 60) newMinutes = 0;
+                    // 计算分钟差值来检测突变
+                    const minuteDiff = newMinutes - minutes;
+                    if (minuteDiff > 30) {
+                        // 逆时针突变（例如从0到59），小时减1
+                        newHours = (hours - 1 + 12) % 12;
+                    } else if (minuteDiff < -30) {
+                        // 顺时针突变（例如从59到0），小时加1
+                        newHours = (hours + 1) % 12;
+                    } else {
+                        // 无突变，保持当前小时
+                        newHours = hours;
+                    }
+                    if (newHours === 0) newHours = 12;
+                    newSeconds = seconds;
+                } else if (activeDragHand === secondHand) {
+                    newSeconds = Math.round((angle / 360) * 60);
+                    if (newSeconds === 60) newSeconds = 0;
+                    // 计算秒数差值来检测突变
+                    const secondDiff = newSeconds - seconds;
+                    if (secondDiff > 30) {
+                        // 逆时针突变（例如从0到59），分钟减1
+                        newMinutes = (minutes - 1 + 60) % 60;
+                    } else if (secondDiff < -30) {
+                        // 顺时针突变（例如从59到0），分钟加1
+                        newMinutes = (minutes + 1) % 60;
+                    } else {
+                        // 无突变，保持当前分钟
+                        newMinutes = minutes;
+                    }
+
+                    // 根据分钟变化调整小时
+                    const minuteDiff = newMinutes - minutes;
+                    if (minuteDiff > 30) {
+                        // 逆时针突变（例如从0到59），小时减1
+                        newHours = (hours - 1 + 12) % 12;
+                    } else if (minuteDiff < -30) {
+                        // 顺时针突变（例如从59到0），小时加1
+                        newHours = (hours + 1) % 12;
+                    } else {
+                        // 无突变，保持当前小时
+                        newHours = hours;
+                    }
+                    if (newHours === 0) newHours = 12;
+                }
+                return {
+                    hours: newHours,
+                    minutes: newMinutes,
+                    seconds: newSeconds
                 };
             }
 
-            document.addEventListener("DOMContentLoaded", function () {
-                function updateClockSize() {
-                    const container = document.querySelector(".container");
-                    const containerHeight = container.clientHeight;
-                    const buttonControlsHeight = document.querySelector(".button-controls").offsetHeight;
-                    const timeInputHeight = document.querySelector(".time-input").offsetHeight;
-                    const paddingTotal = 4 * Math.min(window.innerWidth, window.innerHeight) * 0.02; // 4 * 2dvmin
-
-                    const availableHeight = containerHeight - buttonControlsHeight - timeInputHeight - paddingTotal;
-
-		    const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-                    const viewportWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;
-                    const dvmin = Math.min(viewportWidth, viewportHeight);
-                    const clampedSize = 0.8 * Math.min(dvmin, availableHeight);
-
-                    const root = document.documentElement;
-                    root.style.setProperty("--clock-size", `${clampedSize}px`);
-                    root.style.setProperty("--clock-radius", `${clampedSize / 2}px`);
-
-                    const lastMinuteNumber = document.querySelector(".minute-number");
-                    requestAnimationFrame(() => {
-                        const root = document.documentElement;
-                        const numberSpace = lastMinuteNumber.offsetHeight * 1.2;
-                        root.style.setProperty("--number-space", `${numberSpace}px`);
-                        void root.offsetHeight;
-                    });
-
-                    void root.offsetHeight;
-                }
-
-                const clock = document.querySelector(".clock");
-                const hourHand = document.getElementById("hourHand");
-                const minuteHand = document.getElementById("minuteHand");
-                const secondHand = document.getElementById("secondHand");
-                const hourHandVisual = document.getElementById("hourHandVisual");
-                const minuteHandVisual = document.getElementById("minuteHandVisual");
-                const secondHandVisual = document.getElementById("secondHandVisual");
-                const hourToggle = document.getElementById("hourToggle");
-                const minuteToggle = document.getElementById("minuteToggle");
-                const secondToggle = document.getElementById("secondToggle");
-                const minuteNumbersToggle = document.getElementById("minuteNumbersToggle");
-                const randomTimeBtn = document.getElementById("randomTime");
-                const hourInput = document.getElementById("hourInput");
-                const minuteInput = document.getElementById("minuteInput");
-                const verifyButton = document.getElementById("verifyButton");
-                const syncToggle = document.getElementById("syncToggle");
-                const modal = document.getElementById("resultModal");
-                const modalEmoji = document.getElementById("modalEmoji");
-                const modalText = document.getElementById("modalText");
-                const closeModal = document.getElementById("closeModal");
-                const hourMarksContainer = document.querySelector(".hour-marks");
-
-                let hours = 9;
-                let minutes = 0;
-                let seconds = 0;
-                let isSync = true;
-                let isDragging = false;
-                let activeDragHand = null;
-                let clockCenterX, clockCenterY, currentClockRadiusPx;
-                let showMinuteNumbers = false;
-                let domElementsCreated = false;
-                let lastAngle = 0;
-
-                function createClockDOM() {
-                    //if (domElementsCreated) return;
-                    for (let i = 0; i < 60; i++) {
-                        const angleDeg = i * 6;
-                        const mark = document.createElement("div");
-                        if (i % 5 === 0) {
-                            mark.className = "hour-mark";
-                        } else {
-                            mark.className = "minute-mark";
-                        }
-                        mark.style.transform = `translateX(-50%) rotate(${angleDeg}deg)`;
-                        hourMarksContainer.appendChild(mark);
-                    }
-                    for (let i = 1; i <= 12; i++) {
-                        const number = document.createElement("div");
-                        number.className = "number hour-num";
-                        number.textContent = i;
-                        number.dataset.hour = i;
-                        clock.appendChild(number);
-                        const minuteValue = (i * 5) % 60;
-                        const minuteNumber = document.createElement("div");
-                        minuteNumber.className = "minute-number min-num";
-                        minuteNumber.textContent = minuteValue;
-                        minuteNumber.dataset.hour = i;
-                        minuteNumber.style.opacity = "0";
-                        clock.appendChild(minuteNumber);
-                    }
-
-                    domElementsCreated = true;
-                }
-
-                function positionNumbers() {
-                    if (!domElementsCreated) return;
-                    currentClockRadiusPx = clock.offsetWidth / 2;
-                    if (currentClockRadiusPx === 0) return;
-                    const hourNumbers = clock.querySelectorAll(".hour-num");
-                    const minuteNumbers = clock.querySelectorAll(".min-num");
-                    const numberRadiusRatio = 0.68;
-                    const minuteNumberRadiusRatio = 1.09;
-                    hourNumbers.forEach((number) => {
-                        const hour = parseInt(number.dataset.hour);
-                        const angleRad = (hour / 12) * 2 * Math.PI - Math.PI / 2;
-                        const radius = currentClockRadiusPx * numberRadiusRatio;
-                        const x = Math.cos(angleRad) * radius;
-                        const y = Math.sin(angleRad) * radius;
-                        const numWidth = number.offsetWidth;
-                        const numHeight = number.offsetHeight;
-                        number.style.left = `calc(50% + ${x}px - ${numWidth / 2}px)`;
-                        number.style.top = `calc(50% + ${y}px - ${numHeight / 2}px)`;
-                    });
-                    minuteNumbers.forEach((minuteNumber) => {
-                        const hour = parseInt(minuteNumber.dataset.hour);
-                        const angleRad = (hour / 12) * 2 * Math.PI - Math.PI / 2;
-                        const radius = currentClockRadiusPx * minuteNumberRadiusRatio;
-                        const x = Math.cos(angleRad) * radius;
-                        const y = Math.sin(angleRad) * radius;
-                        const numWidth = minuteNumber.offsetWidth;
-                        const numHeight = minuteNumber.offsetHeight;
-                        minuteNumber.style.left = `calc(50% + ${x}px - ${numWidth / 2}px)`;
-                        minuteNumber.style.top = `calc(50% + ${y}px - ${numHeight / 2}px)`;
-                    });
-                }
-
-                function toggleMinuteNumbers() {
-                    showMinuteNumbers = !showMinuteNumbers;
-                    const minuteNumElements = document.querySelectorAll(".minute-number");
-                    minuteNumElements.forEach((num) => {
-                        num.style.opacity = showMinuteNumbers ? "1" : "0";
-                    });
-                    minuteNumbersToggle.classList.toggle("active", showMinuteNumbers);
-                    minuteNumbersToggle.textContent = showMinuteNumbers ? "分钟数字 ✓" : "分钟数字";
-                }
-
-                function updateClockHands() {
-                    const hourDegrees = (hours % 12) * 30 + minutes / 2 + seconds / 120;
-                    const minuteDegrees = minutes * 6 + seconds / 10;
-                    const secondDegrees = seconds * 6;
-                    hourHand.style.transform = `translateX(-50%) rotate(${hourDegrees}deg)`;
-                    minuteHand.style.transform = `translateX(-50%) rotate(${minuteDegrees}deg)`;
-                    secondHand.style.transform = `translateX(-50%) rotate(${secondDegrees}deg)`;
-                    hourHandVisual.style.transform = `translateX(-50%) rotate(${hourDegrees}deg)`;
-                    minuteHandVisual.style.transform = `translateX(-50%) rotate(${minuteDegrees}deg)`;
-                    secondHandVisual.style.transform = `translateX(-50%) rotate(${secondDegrees}deg)`;
+            function setupEventListeners() {
+                hourToggle.addEventListener("click", function() {
+                    this.classList.toggle("active");
+                    hourHand.style.display = this.classList.contains("active") ? "block" : "none";
+                    hourHandVisual.style.display = this.classList.contains("active") ? "block" : "none";
+                    //this.textContent = this.classList.contains("active") ? "时针 ✓" : "时针";
+                });
+                minuteToggle.addEventListener("click", function() {
+                    this.classList.toggle("active");
+                    minuteHand.style.display = this.classList.contains("active") ? "block" : "none";
+                    minuteHandVisual.style.display = this.classList.contains("active") ? "block" : "none";
+                    //this.textContent = this.classList.contains("active") ? "分针 ✓" : "分针";
+                });
+                secondToggle.addEventListener("click", function() {
+                    this.classList.toggle("active");
+                    secondHand.style.display = this.classList.contains("active") ? "block" : "none";
+                    secondHandVisual.style.display = this.classList.contains("active") ? "block" : "none";
+                    //this.textContent = this.classList.contains("active") ? "秒针 ✓" : "秒针";
+                });
+                minuteNumbersToggle.addEventListener("click", toggleMinuteNumbers);
+                randomTimeBtn.addEventListener("click", generateRandomTime);
+                syncToggle.addEventListener("click", function() {
+                    isSync = !isSync;
+                    this.classList.toggle("active");
+                    //this.textContent = isSync ? "联动✓" : "联动";
                     if (isSync) {
                         updateInputs();
+                    } else {
+                        hourInput.value = "";
+                        minuteInput.value = "";
                     }
-                }
-
-                function updateInputs() {
-                    hourInput.value = hours === 0 ? 12 : hours;
-                    minuteInput.value = minutes;
-                }
-
-                function updateClockTime(newHours, newMinutes, newSeconds) {
-                    hours = newHours < 0 ? 12 + (newHours % 12) : newHours % 12;
-                    if (hours === 0 && newHours !== 0) hours = 12;
-                    minutes = newMinutes < 0 ? 60 + (newMinutes % 60) : newMinutes % 60;
-                    seconds = newSeconds < 0 ? 60 + (newSeconds % 60) : newSeconds % 60;
-                    updateClockHands();
-                }
-
-                function generateRandomTime() {
-                    const randomHours = Math.floor(Math.random() * 12) + 1;
-                    const randomMinutes = Math.floor(Math.random() * 60);
-                    const randomSeconds = secondToggle.classList.contains("active") ? Math.floor(Math.random() * 60) : 0;
-                    updateClockTime(randomHours, randomMinutes, randomSeconds);
-                }
-
-                function calculateAngle(x, y) {
-                    const rect = clock.getBoundingClientRect();
-                    clockCenterX = rect.left + rect.width / 2;
-                    clockCenterY = rect.top + rect.height / 2;
-                    const deltaX = x - clockCenterX;
-                    const deltaY = y - clockCenterY;
-                    let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
-                    if (angle < 0) angle += 360;
-                    return angle;
-                }
-
-                function getHandFromAngle(angle) {
-                    let newHours, newMinutes, newSeconds;
-
-                    if (activeDragHand === hourHand) {
-                        newHours = Math.floor((angle / 360) * 12);
-                        newMinutes = minutes;
-                        newSeconds = seconds;
-                        const totalMinutes = (angle / 360) * 720;
-                        newMinutes = Math.round(totalMinutes % 60);
-                        newHours = Math.floor(totalMinutes / 60);
-                        if (newHours === 0) newHours = 12;
-                    } else if (activeDragHand === minuteHand) {
-                        newMinutes = Math.round((angle / 360) * 60);
-                        if (newMinutes === 60) newMinutes = 0;
-                        // 计算分钟差值来检测突变
-                        const minuteDiff = newMinutes - minutes;
-                        if (minuteDiff > 30) {
-                            // 逆时针突变（例如从0到59），小时减1
-                            newHours = (hours - 1 + 12) % 12;
-                        } else if (minuteDiff < -30) {
-                            // 顺时针突变（例如从59到0），小时加1
-                            newHours = (hours + 1) % 12;
-                        } else {
-                            // 无突变，保持当前小时
-                            newHours = hours;
-                        }
-                        if (newHours === 0) newHours = 12;
-                        newSeconds = seconds;
-                    } else if (activeDragHand === secondHand) {
-                        newSeconds = Math.round((angle / 360) * 60);
-                        if (newSeconds === 60) newSeconds = 0;
-                        // 计算秒数差值来检测突变
-                        const secondDiff = newSeconds - seconds;
-                        if (secondDiff > 30) {
-                            // 逆时针突变（例如从0到59），分钟减1
-                            newMinutes = (minutes - 1 + 60) % 60;
-                        } else if (secondDiff < -30) {
-                            // 顺时针突变（例如从59到0），分钟加1
-                            newMinutes = (minutes + 1) % 60;
-                        } else {
-                            // 无突变，保持当前分钟
-                            newMinutes = minutes;
-                        }
-
-                        // 根据分钟变化调整小时
-                        const minuteDiff = newMinutes - minutes;
-                        if (minuteDiff > 30) {
-                            // 逆时针突变（例如从0到59），小时减1
-                            newHours = (hours - 1 + 12) % 12;
-                        } else if (minuteDiff < -30) {
-                            // 顺时针突变（例如从59到0），小时加1
-                            newHours = (hours + 1) % 12;
-                        } else {
-                            // 无突变，保持当前小时
-                            newHours = hours;
-                        }
-                        if (newHours === 0) newHours = 12;
+                });
+                verifyButton.addEventListener("click", function() {
+                    const inputHour = parseInt(hourInput.value) || 0;
+                    const inputMinute = parseInt(minuteInput.value) || 0;
+                    const clockHour = hours === 0 ? 12 : hours;
+                    const inputHourCap = inputHour === 0 ? 12 : inputHour;
+                    if (inputHourCap === clockHour && inputMinute === minutes) {
+                        modalEmoji.textContent = "😄";
+                        modalText.textContent = "太棒了！你答对了！";
+                    } else {
+                        modalEmoji.textContent = "😊";
+                        modalText.textContent = "Oops，再努力一次吧！";
                     }
-                    return { hours: newHours, minutes: newMinutes, seconds: newSeconds };
-                }
-
-                function setupEventListeners() {
-                    hourToggle.addEventListener("click", function () {
-                        this.classList.toggle("active");
-                        hourHand.style.display = this.classList.contains("active") ? "block" : "none";
-                        hourHandVisual.style.display = this.classList.contains("active") ? "block" : "none";
-                        this.textContent = this.classList.contains("active") ? "时针 ✓" : "时针";
+                    modal.classList.add("show");
+                });
+                closeModal.addEventListener("click", function() {
+                    modal.classList.remove("show");
+                });
+                modal.addEventListener("click", function(e) {
+                    if (e.target === modal) modal.classList.remove("show");
+                });
+                const handPairs = [{
+                        clickable: hourHand,
+                        visual: hourHandVisual
+                    },
+                    {
+                        clickable: minuteHand,
+                        visual: minuteHandVisual
+                    },
+                    {
+                        clickable: secondHand,
+                        visual: secondHandVisual
+                    },
+                ];
+                handPairs.forEach((pair) => {
+                    pair.clickable.addEventListener("mousedown", function(e) {
+                        startDrag.call(this, e);
+                        activeVisualHand = pair.visual;
                     });
-                    minuteToggle.addEventListener("click", function () {
-                        this.classList.toggle("active");
-                        minuteHand.style.display = this.classList.contains("active") ? "block" : "none";
-                        minuteHandVisual.style.display = this.classList.contains("active") ? "block" : "none";
-                        this.textContent = this.classList.contains("active") ? "分针 ✓" : "分针";
-                    });
-                    secondToggle.addEventListener("click", function () {
-                        this.classList.toggle("active");
-                        secondHand.style.display = this.classList.contains("active") ? "block" : "none";
-                        secondHandVisual.style.display = this.classList.contains("active") ? "block" : "none";
-                        this.textContent = this.classList.contains("active") ? "秒针 ✓" : "秒针";
-                    });
-                    minuteNumbersToggle.addEventListener("click", toggleMinuteNumbers);
-                    randomTimeBtn.addEventListener("click", generateRandomTime);
-                    syncToggle.addEventListener("click", function () {
-                        isSync = !isSync;
-                        this.classList.toggle("active");
-                        this.textContent = isSync ? "联动✓" : "联动";
-                        if (isSync) {
-                            updateInputs();
-                        } else {
-                            hourInput.value = "";
-                            minuteInput.value = "";
-                        }
-                    });
-                    verifyButton.addEventListener("click", function () {
-                        const inputHour = parseInt(hourInput.value) || 0;
-                        const inputMinute = parseInt(minuteInput.value) || 0;
-                        const clockHour = hours === 0 ? 12 : hours;
-                        const inputHourCap = inputHour === 0 ? 12 : inputHour;
-                        if (inputHourCap === clockHour && inputMinute === minutes) {
-                            modalEmoji.textContent = "😄";
-                            modalText.textContent = "太棒了！你答对了！";
-                        } else {
-                            modalEmoji.textContent = "😊";
-                            modalText.textContent = "Oops，再努力一次吧！";
-                        }
-                        modal.classList.add("show");
-                    });
-                    closeModal.addEventListener("click", function () {
-                        modal.classList.remove("show");
-                    });
-                    modal.addEventListener("click", function (e) {
-                        if (e.target === modal) modal.classList.remove("show");
-                    });
-                    const handPairs = [
-                        { clickable: hourHand, visual: hourHandVisual },
-                        { clickable: minuteHand, visual: minuteHandVisual },
-                        { clickable: secondHand, visual: secondHandVisual },
-                    ];
-                    handPairs.forEach((pair) => {
-                        pair.clickable.addEventListener("mousedown", function (e) {
+                    pair.clickable.addEventListener(
+                        "touchstart",
+                        function(e) {
                             startDrag.call(this, e);
                             activeVisualHand = pair.visual;
-                        });
-                        pair.clickable.addEventListener(
-                            "touchstart",
-                            function (e) {
-                                startDrag.call(this, e);
-                                activeVisualHand = pair.visual;
-                            },
-                            { passive: false }
-                        );
-                    });
-                    document.addEventListener("mousemove", drag);
-                    document.addEventListener("touchmove", drag, { passive: false });
-                    document.addEventListener("mouseup", endDrag);
-                    document.addEventListener("touchend", endDrag);
-                    hourInput.addEventListener("input", function () {
-                        if (!isSync) {
-                            let value = parseInt(this.value) || 0;
-                            if (value > 12) value = 12;
-                            if (value < 0) value = 0;
-                            this.value = value;
+                        }, {
+                            passive: false
                         }
-                    });
-                    hourInput.addEventListener("focus", function () {
-                        if (!isSync) this.value = "";
-                    });
-                    minuteInput.addEventListener("focus", function () {
-                        if (!isSync) this.value = "";
-                    });
-                    minuteInput.addEventListener("input", function () {
-                        if (!isSync) {
-                            let value = parseInt(this.value) || 0;
-                            if (value > 59) value = 59;
-                            if (value < 0) value = 0;
-                            this.value = value;
-                        }
-                    });
-                    window.addEventListener(
-                        "resize",
-                        debounce(function () {
-                            updateClockSize();
-                            handleResize();
-                        }, 150)
                     );
-                    document.addEventListener('visibilitychange', function() {
-                        if (document.visibilityState === 'visible') {
-                            requestAnimationFrame(() => {
-				    updateClockSize();
-			    });
-                        }
-		    });
-		    // 添加 pageshow 事件监听以处理 BFCache 恢复
-                    window.addEventListener('pageshow', (event) => {
-                        if (event.persisted) {
-                            requestAnimationFrame(() => {
-                                    updateClockSize();
-                                    updateClockDimensionsAndPositions();
-                                    updateClockHands();
-                            });
-                        }
+                });
+                document.addEventListener("mousemove", drag);
+                document.addEventListener("touchmove", drag, {
+                    passive: false
+                });
+                document.addEventListener("mouseup", endDrag);
+                document.addEventListener("touchend", endDrag);
+                hourInput.addEventListener("input", function() {
+                    if (!isSync) {
+                        let value = parseInt(this.value) || 0;
+                        if (value > 12) value = 12;
+                        if (value < 0) value = 0;
+                        this.value = value;
+                    }
+                });
+                hourInput.addEventListener("focus", function() {
+                    if (!isSync) this.value = "";
+                });
+                minuteInput.addEventListener("focus", function() {
+                    if (!isSync) this.value = "";
+                });
+                minuteInput.addEventListener("input", function() {
+                    if (!isSync) {
+                        let value = parseInt(this.value) || 0;
+                        if (value > 59) value = 59;
+                        if (value < 0) value = 0;
+                        this.value = value;
+                    }
+                });
+                window.addEventListener(
+                    "resize",
+                    debounce(function() {
+                        updateClockSize();
+                        handleResize();
+                    }, 150)
+                );
+                document.addEventListener('visibilitychange', function() {
+                    if (document.visibilityState === 'visible') {
+                        requestAnimationFrame(() => {
+                            updateClockSize();
+                        });
+                    }
+                });
+                // 添加 pageshow 事件监听以处理 BFCache 恢复
+                window.addEventListener('pageshow', (event) => {
+                    if (event.persisted) {
+                        requestAnimationFrame(() => {
+                            updateClockSize();
+                            updateClockDimensionsAndPositions();
+                            updateClockHands();
+                        });
+                    }
+                });
+
+
+                currentTimeToggle.addEventListener("click", function() {
+                    const isActive = currentTimeToggle.classList.toggle("active");
+                    if (isActive) {
+                        //currentTimeToggle.textContent = "当前时间 ✓";
+                        startPreciseClockSync();
+                    } else {
+                        //currentTimeToggle.textContent = "当前时间";
+                        stopClockSync();
+                    }
+                });
+            }
+
+            function startDrag(e) {
+                e.preventDefault();
+                updateClockDimensionsAndPositions();
+                if (!this.offsetParent) return;
+                isDragging = true;
+                activeDragHand = this;
+            }
+
+            function drag(e) {
+                if (!isDragging || !activeDragHand) return;
+                e.preventDefault();
+                const pageX = e.type.includes("touch") ? e.touches[0].pageX : e.pageX;
+                const pageY = e.type.includes("touch") ? e.touches[0].pageY : e.pageY;
+                const currentAngle = calculateAngle(pageX, pageY);
+                const newTime = getHandFromAngle(currentAngle);
+                updateClockTime(newTime.hours, newTime.minutes, newTime.seconds);
+            }
+
+            function endDrag() {
+                isDragging = false;
+                activeDragHand = null;
+                activeVisualHand = null;
+            }
+
+            function updateClockDimensionsAndPositions() {
+                positionNumbers();
+                const rect = clock.getBoundingClientRect();
+                clockCenterX = rect.left + rect.width / 2;
+                clockCenterY = rect.top + rect.height / 2;
+            }
+
+            function handleResize() {
+                updateClockDimensionsAndPositions();
+            }
+
+            function init() {
+                createClockDOM();
+                updateClockSize();
+                updateClockDimensionsAndPositions();
+                setupEventListeners();
+                updateClockTime(9, 0, 0);
+
+                if (document.visibilityState === 'visible') {
+                    requestAnimationFrame(() => {
+                        updateClockSize();
+                        updateClockDimensionsAndPositions();
+                        updateClockHands();
                     });
                 }
+            }
 
-                function startDrag(e) {
-                    e.preventDefault();
-                    updateClockDimensionsAndPositions();
-                    if (!this.offsetParent) return;
-                    isDragging = true;
-                    activeDragHand = this;
-                }
+            init();
+        });
+    </script>
+</body>
 
-                function drag(e) {
-                    if (!isDragging || !activeDragHand) return;
-                    e.preventDefault();
-                    const pageX = e.type.includes("touch") ? e.touches[0].pageX : e.pageX;
-                    const pageY = e.type.includes("touch") ? e.touches[0].pageY : e.pageY;
-                    const currentAngle = calculateAngle(pageX, pageY);
-                    const newTime = getHandFromAngle(currentAngle);
-                    updateClockTime(newTime.hours, newTime.minutes, newTime.seconds);
-                }
-
-                function endDrag() {
-                    isDragging = false;
-                    activeDragHand = null;
-                    activeVisualHand = null;
-                }
-
-                function updateClockDimensionsAndPositions() {
-                    positionNumbers();
-                    const rect = clock.getBoundingClientRect();
-                    clockCenterX = rect.left + rect.width / 2;
-                    clockCenterY = rect.top + rect.height / 2;
-                }
-
-                function handleResize() {
-                    updateClockDimensionsAndPositions();
-                }
-
-                function init() {
-                    createClockDOM();
-                    updateClockSize();
-                    updateClockDimensionsAndPositions();
-                    setupEventListeners();
-                    updateClockTime(9, 0, 0);
-
-		    if (document.visibilityState === 'visible') {
-			requestAnimationFrame(() => {
-			    updateClockSize();
-			    updateClockDimensionsAndPositions();
-			    updateClockHands();
-		    });
-    }
-                }
-
-                init();
-            });
-        </script>
-    </body>
 </html>
